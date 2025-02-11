@@ -64,7 +64,7 @@ What Method signatures those methods have:
            setMethod(), 
            setHeader(), 
            send() 
-напрямую. Вместо этого, вы используете такие методы: 
+           напрямую. Вместо этого, вы используете такие методы: 
            requests.get(), 
            requests.post()
 
