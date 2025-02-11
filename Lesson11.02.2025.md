@@ -1,7 +1,10 @@
 # Hajusrakenuste-alused
 
 
-*HTTP*
+# HTTP     
+
+           *client library*
+           *servrt library*
 
 Client and Server
 Method, Code, Url
@@ -11,6 +14,4 @@ payload    Html
 Json       Json
 
 
-# HTTP 
-      *client library*
-      *servrt library*
+
