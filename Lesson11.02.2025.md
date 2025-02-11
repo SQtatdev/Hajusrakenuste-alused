@@ -1,7 +1,7 @@
 # Hajusrakenuste-alused
 
 
-# HTTP     
+## HTTP     
 
            *client library*
            *servrt library*
@@ -16,9 +16,9 @@ payload    Html
 Json       Json
 
 
-# Methods: * GET, POST, PUT, DELETE, OPTIONS,.... *
+### Methods: GET, POST, PUT, DELETE, OPTIONS,.... 
 
-# Status Codes: 
+### Status Codes: 
           *2xx - success*
           *3XX - redirect*
           *4xx - client errors*
