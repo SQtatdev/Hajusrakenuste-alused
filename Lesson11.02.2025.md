@@ -28,10 +28,8 @@ Json       Json
 *** Header and Body ***
 
 Use HTTP client library to send request to any webserver. 
-
-
-### What methods dous your library provide? 
-### What Method signatures those methods have:
+What methods dous your library provide? 
+What Method signatures those methods have:
           setMethod(?)
           setHeader(?, ?)
           send(?, ?)
