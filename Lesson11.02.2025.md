@@ -25,11 +25,10 @@ Json       Json
           4xx - client errors
           5xx - server errors
 ```
-*** Header and Body ***
+Header and Body
 
 
 ##Task
-
 ```
 Use HTTP client library to send request to any webserver. 
 What methods dous your library provide? 
