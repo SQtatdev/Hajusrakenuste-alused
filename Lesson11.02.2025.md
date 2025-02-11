@@ -86,3 +86,17 @@ Here’s the shortened comparison between **requests** and **http.client**:
 ### When to Use:
 - **requests**: When you need to quickly and easily send requests.
 - **http.client**: When you need more control and low-level HTTP handling.
+
+
+
+
+
+## 1. the requests library (High-level library)
+
+### The requests library works at a higher level and does not use the: 
+           setMethod(),
+           setHeader(),
+           send() 
+### methods directly. Instead, you use methods such as:
+           requests.get(),
+           requests.post()
