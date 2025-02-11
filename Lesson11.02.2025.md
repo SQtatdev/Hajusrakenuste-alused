@@ -16,7 +16,7 @@ payload    Html
 Json       Json
 
 
-Methods: GET, POST, PUT, DELETE, OPTIONS,....
+# Methods: * GET, POST, PUT, DELETE, OPTIONS,.... *
 
 # Status Codes: 
           *2xx - success*
