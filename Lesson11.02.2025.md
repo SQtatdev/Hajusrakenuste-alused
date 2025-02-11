@@ -3,8 +3,8 @@
 
 ## HTTP     
 
-           *client library*
-           *server library*
+           client library
+           server library
 
 Client and Server
 
@@ -19,11 +19,12 @@ Json       Json
 ### Methods: GET, POST, PUT, DELETE, OPTIONS,.... 
 
 ### Status Codes: 
-          *2xx - success*
-          *3XX - redirect*
-          *4xx - client errors*
-          *5xx - server errors*
-
+```
+          2xx - success
+          3XX - redirect
+          4xx - client errors
+          5xx - server errors
+```
 *** Header and Body ***
 
 Use HTTP client library to send request to any webserver. 
