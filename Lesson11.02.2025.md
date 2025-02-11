@@ -24,5 +24,14 @@ Json       Json
           *4xx - client errors*
           *5xx - server errors*
 
+*** Header and Body ***
 
+Use HTTP client library to send request to any webserver. 
 
+```
+### What methods dous your library provide? 
+### What Method signatures those methods have:
+                              *setMethod(?)*
+                              *setHeader(?, ?)*
+                              *send(?, ?)*
+```
