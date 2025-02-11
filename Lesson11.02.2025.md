@@ -60,10 +60,14 @@ What Method signatures those methods have:
 
 
 ### 1. Библиотека requests (Высокоуровневая библиотека)
-```
-Библиотека requests работает на более высоком уровне и не использует методы:
- setMethod(), setHeader(), и send() напрямую. Вместо этого, вы используете такие методы, как requests.get(), requests.post()
-```
+           Библиотека requests работает на более высоком уровне и не использует методы:          
+           setMethod(), 
+           setHeader(), 
+           send() 
+напрямую. Вместо этого, вы используете такие методы: 
+           requests.get(), 
+           requests.post()
+
 # ENG
 
 
