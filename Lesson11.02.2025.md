@@ -28,7 +28,7 @@ Json       Json
 Header and Body
 
 
-###Task:
+Task:
 ```
 Use HTTP client library to send request to any webserver. 
 What methods dous your library provide? 
@@ -37,4 +37,3 @@ What Method signatures those methods have:
           setHeader(?, ?)
           send(?, ?)
 ```
-
