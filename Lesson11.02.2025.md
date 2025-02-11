@@ -4,7 +4,7 @@
 ## HTTP     
 
            *client library*
-           *servrt library*
+           *server library*
 
 Client and Server
 
