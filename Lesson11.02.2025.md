@@ -18,7 +18,7 @@ Json       Json
 
 Methods: GET, POST, PUT, DELETE, OPTIONS,....
 
-Status Codes: 
+# Status Codes: 
           *2xx - success*
           *3XX - redirect*
           *4xx - client errors*
