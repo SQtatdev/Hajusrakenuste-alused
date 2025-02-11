@@ -63,7 +63,7 @@ What Method signatures those methods have:
 
 Here’s the shortened comparison between **requests** and **http.client**:
 
-| **Aspect**                | **requests**                        | **http.client**                         |
+| **Aspect**                | **`requests`**                        | **`http.client`**                         |
 |--------------------------|---------------------------------------|------------------------------------------|
 | **Level of Abstraction**  | High, simplifies working with HTTP    | Low, more control, requires more code    |
 | **Ease of Use**           | Very easy to use                      | More complex, requires more code         |
