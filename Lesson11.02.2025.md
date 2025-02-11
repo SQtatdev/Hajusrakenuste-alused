@@ -59,7 +59,7 @@ What Method signatures those methods have:
 - **http.client**: Если нужно больше контроля и работы с низким уровнем HTTP.
 
 
-## 1. Библиотека requests (Высокоуровневая библиотека)
+## 1. Библиотека `requests` (Высокоуровневая библиотека)
 ### Библиотека requests работает на более высоком уровне и не использует методы:          
            setMethod(), 
            setHeader(), 
@@ -91,7 +91,7 @@ Here’s the shortened comparison between **requests** and **http.client**:
 
 
 
-## 1. the requests library (High-level library)
+## 1. the `requests` library (High-level library)
 
 ### The requests library works at a higher level and does not use the: 
            setMethod(),
