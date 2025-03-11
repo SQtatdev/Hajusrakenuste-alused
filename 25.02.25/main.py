@@ -1,48 +1,48 @@
 from fastapi import FastAPI, Query
 import pandas as pd
-import chardet
 
 app = FastAPI()
 
 FILENAME = "LE.txt"
 
-# Определяем кодировку файла
-with open(FILENAME, "rb") as f:
-    raw_data = f.read(10000)  # Читаем первые 10 000 байт
-    result = chardet.detect(raw_data)
-    encoding = result["encoding"]
-    print("Кодировка файла:", encoding)
-
-# Загружаем файл с нужной кодировкой, пропуская некорректные строки
-df = pd.read_csv(FILENAME, delimiter="        ", encoding=encoding, on_bad_lines="skip", dtype={"5": str})
-
+# Read CSV without treating the first row as column names
+df = pd.read_csv(FILENAME, delimiter="\t", encoding="ISO-8859-1", on_bad_lines="skip", dtype=str, header=None)
 
 @app.get("/")
 def read_root():
-    """Тестовый эндпоинт для проверки работы сервера"""
     return {"message": "Server is running"}
 
-@app.get("/spare-parts")
-def get_spare_parts(
-    page: int = Query(1, alias="page", ge=1)
-):
-    """
-    Возвращает список запчастей с поддержкой:
-    - Пагинации (по 30 записей на страницу)
-    """
-    # Заменить все значения NaN или inf на None
-    df_cleaned = df.apply(lambda col: col.map(lambda x: None if (isinstance(x, float) and (x != x or x == float("inf") or x == float("-inf"))) else x))
-
+@app.get("/products")
+def get_products(page: int = Query(1, alias="page", ge=1)):
+    """Returns a list of products with pagination."""
+    
     per_page = 30
     start_idx = (page - 1) * per_page
     end_idx = start_idx + per_page
 
-    # Отдаем данные без фильтрации и сортировки для теста
-    return {"total": len(df_cleaned), "page": page, "data": df_cleaned.iloc[start_idx:end_idx].to_dict(orient="records")}
+    df_cleaned = df.fillna("Unknown")
 
+    products = []
+    for _, row in df_cleaned.iloc[start_idx:end_idx].iterrows():
+        product = {
+            "id": row[0],  # First column is likely an ID
+            "name": row[1],  # Second column seems like the product name
+            "price": float(row[8].replace(",", ".") if row[8] != "Unknown" else 0),  # Adjusted for European decimals
+            "brand": row[9],  # Brand seems to be in column 9
+            "category": "Misc",
+            "currency": "EUR",
+            "stock": 0,
+            "ratings": 0,
+            "description": "No description available",
+            "reviews": [{"user": "Anonymous", "rating": 4, "comment": "No reviews yet"}],
+            "images": [],
+            "dimensions": {"width": "Unknown", "height": "Unknown", "depth": "Unknown", "weight": "Unknown"},
+            "availability": "Unknown"
+        }
+        products.append(product)
 
+    return {"total": len(df_cleaned), "page": page, "data": products}
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
-
