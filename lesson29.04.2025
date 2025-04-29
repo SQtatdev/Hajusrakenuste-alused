@@ -1,9 +1,12 @@
 # Ways to atack web-server
 
-sql-injection
-ddos attack
-XSS - cross site scripting ( unsecured inpuuts in forms, reviews, comments, username ) https://www.brightsec.com/blog/cross-site-scripting-xss/
-brute force, both passwords and directory transversing
+##sql-injection:
+   `SELECT * FROM products WHERE name = '%{req.query.search}%'`
+   "SELECT * FROM products WHERE name = '%car'; UPDATE users SET password='' WHERE role='admin' --%'"
+   search = "car; UPDATE users SET password = '' WHERE role=''admin'' --"
+##ddos attack
+##XSS - cross site scripting ( unsecured inpuuts in forms, reviews, comments, username ) https://www.brightsec.com/blog/cross-site-scripting-xss/
+##brute force, both passwords and directory transversing
 
 
 
