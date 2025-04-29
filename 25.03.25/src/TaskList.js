@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const API_URL = "http://demo2.z-bit.ee/";
@@ -7,8 +7,8 @@ const TaskList = ({ token, setIsAuthenticated }) => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
 
-  // Функция для получения задач
-  const fetchTasks = async () => {
+  // ✅ UseCallback to prevent redefining fetchTasks
+  const fetchTasks = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/tasks`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -17,14 +17,13 @@ const TaskList = ({ token, setIsAuthenticated }) => {
     } catch (error) {
       console.error("Ошибка при получении задач:", error);
     }
-  };
+  }, [token]);
 
-  // Эффект для загрузки задач при изменении токена
   useEffect(() => {
     if (token) {
       fetchTasks();
     }
-  }, [token, fetchTasks]);  // Добавляем fetchTasks в зависимости
+  }, [token, fetchTasks]);
 
   const addTask = async () => {
     if (!newTask) return;
@@ -37,7 +36,7 @@ const TaskList = ({ token, setIsAuthenticated }) => {
         }
       );
       setNewTask('');
-      fetchTasks(); // Обновление списка задач
+      fetchTasks(); // Re-fetch tasks
     } catch (error) {
       console.error("Ошибка при добавлении задачи:", error);
     }
@@ -48,7 +47,7 @@ const TaskList = ({ token, setIsAuthenticated }) => {
       await axios.delete(`${API_URL}/tasks/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchTasks(); // Обновление списка задач
+      fetchTasks(); // Re-fetch tasks
     } catch (error) {
       console.error("Ошибка при удалении задачи:", error);
     }
@@ -60,8 +59,8 @@ const TaskList = ({ token, setIsAuthenticated }) => {
   };
 
   return (
-    <div>
-      <button onClick={handleLogout}>Log in</button>
+    <div className="container">
+      <button onClick={handleLogout}>Выйти</button>
       <input
         type="text"
         value={newTask}
@@ -71,7 +70,7 @@ const TaskList = ({ token, setIsAuthenticated }) => {
       <button onClick={addTask}>Добавить задачу</button>
       <ul>
         {tasks.map((task) => (
-          <li key={task.id}>
+          <li key={task.id} className="task-item">
             {task.name}
             <button onClick={() => deleteTask(task.id)}>Удалить</button>
           </li>

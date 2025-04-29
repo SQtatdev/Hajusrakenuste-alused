@@ -28,13 +28,13 @@ const RegisterForm = ({ setToken, setIsAuthenticated }) => {
       <form onSubmit={handleRegister}>
         <input
           type="text"
-          placeholder="Имя пользователя"
+          placeholder="name"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <input
           type="password"
-          placeholder="Пароль"
+          placeholder="pass"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
