@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo Rakendus</title>
+    
+    <!-- Иконка вкладки -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✅</text></svg>">
+
+    <!-- Подключение внешнего CSS-файла -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ToDo Rakendus</h1>
+
+        <!-- Секция авторизации -->
+        <div id="auth-section" class="auth-section">
+            <h2>Sisene või registreeri</h2>
+            <input type="text" id="username" placeholder="Kasutajanimi" value="demo">
+            <input type="password" id="password" placeholder="Parool" value="demo">
+            <button id="login-btn">Sisene</button>
+            <button id="register-btn">Registreeri</button>
+            <p><small>Testimiseks: demo/demo</small></p>
+        </div>
+
+        <!-- Секция задач -->
+        <div id="task-section" class="task-section" style="display:none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Minu ülesanded</h2>
+                <button id="logout-btn">Logi välja</button>
+            </div>
+
+            <div style="display: flex; margin-bottom: 20px;">
+                <input type="text" id="new-task" placeholder="Uus ülesanne">
+                <button id="add-task-btn" style="margin-left: 10px; width: auto;">Lisa</button>
+            </div>
+
+            <div id="task-list"></div>
+        </div>
+
+        <!-- Сообщения об ошибках или успехе -->
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        // Инициализация переменных
+        let userToken = null;
+        let currentUser = null;
+
+        // Массивы пользователей и задач (временные, имитируют БД)
+        let mockUsers = [{ username: 'demo', password: 'demo', id: 1 }];
+        let mockTasks = [
+            { id: 1, title: 'Näide ülesanne 1', completed: false, userId: 1 },
+            { id: 2, title: 'Näide ülesanne 2', completed: true, userId: 1 }
+        ];
+        let nextTaskId = 3;
+
+        // Ссылки на элементы DOM
+        const authSection = document.getElementById('auth-section');
+        const taskSection = document.getElementById('task-section');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const newTaskInput = document.getElementById('new-task');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const taskList = document.getElementById('task-list');
+        const messageDiv = document.getElementById('message');
+
+        // Показывает сообщение пользователю
+        function showMessage(text, isError = false) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${isError ? 'error' : 'success'}`;
+            messageDiv.style.display = 'block';
+            setTimeout(() => messageDiv.style.display = 'none', 3000);
+        }
+
+        // Моделирует вход
+        function mockLogin(username, password) {
+            const user = mockUsers.find(u => u.username === username && u.password === password);
+            if (user) return { token: 'mock-token-' + user.id, user };
+            throw new Error('Vale kasutajanimi või parool');
+        }
+
+        // Моделирует регистрацию
+        function mockRegister(username, password) {
+            if (mockUsers.find(u => u.username === username))
+                throw new Error('Kasutajanimi on juba võetud');
+            const newUser = { id: mockUsers.length + 1, username, password };
+            mockUsers.push(newUser);
+            return { success: true };
+        }
+
+        // Получает задачи текущего пользователя
+        function mockGetTasks() {
+            if (!currentUser) throw new Error('Pole sisse logitud');
+            return mockTasks.filter(task => task.userId === currentUser.id);
+        }
+
+        // Добавляет задачу
+        function mockAddTask(title) {
+            if (!currentUser) throw new Error('Pole sisse logitud');
+            const newTask = { id: nextTaskId++, title, completed: false, userId: currentUser.id };
+            mockTasks.push(newTask);
+            return newTask;
+        }
+
+        // Обновляет задачу
+        function mockUpdateTask(taskId, updates) {
+            const index = mockTasks.findIndex(t => t.id === parseInt(taskId) && t.userId === currentUser.id);
+            if (index === -1) throw new Error('Ülesanne ei leitud');
+            mockTasks[index] = { ...mockTasks[index], ...updates };
+            return mockTasks[index];
+        }
+
+        // Удаляет задачу
+        function mockDeleteTask(taskId) {
+            const index = mockTasks.findIndex(t => t.id === parseInt(taskId) && t.userId === currentUser.id);
+            if (index === -1) throw new Error('Ülesanne ei leitud');
+            mockTasks.splice(index, 1);
+            return { success: true };
+        }
+
+        // Логин
+        async function login() {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            if (!username || !password) return showMessage('Palun sisesta kasutajanimi ja parool', true);
+            try {
+                const data = mockLogin(username, password);
+                userToken = data.token;
+                currentUser = data.user;
+                showMessage('Sisselogimine õnnestus!');
+                usernameInput.value = '';
+                passwordInput.value = '';
+                loadTasks();
+                authSection.style.display = 'none';
+                taskSection.style.display = 'block';
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        }
+
+        // Регистрация
+        async function register() {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            if (!username || !password)
+                return showMessage('Palun sisesta kasutajanimi ja parool', true);
+            if (username.length < 3 || password.length < 3)
+                return showMessage('Kasutajanimi ja parool peavad olema vähemalt 3 tähemärki', true);
+            try {
+                mockRegister(username, password);
+                showMessage('Kasutaja registreeritud! Palun logi sisse');
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        }
+
+        // Загрузка задач
+        async function loadTasks() {
+            try {
+                const tasks = mockGetTasks();
+                renderTasks(tasks);
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        }
+
+        // Отображение задач
+        function renderTasks(tasks) {
+            taskList.innerHTML = '';
+            if (!tasks.length) return taskList.innerHTML = '<p>Ülesanded puuduvad. Lisa esimene ülesanne!</p>';
+            tasks.forEach(task => {
+                const el = document.createElement('div');
+                el.className = `task-item ${task.completed ? 'completed' : ''}`;
+                el.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
+                    <span class="task-text">${task.title}</span>
+                    <button class="delete-btn" data-id="${task.id}">Kustuta</button>
+                `;
+                taskList.appendChild(el);
+            });
+
+            document.querySelectorAll('.task-item input[type="checkbox"]').forEach(cb =>
+                cb.addEventListener('change', toggleTaskStatus));
+            document.querySelectorAll('.delete-btn').forEach(btn =>
+                btn.addEventListener('click', deleteTask));
+        }
+
+        // Добавление задачи
+        async function addTask() {
+            const title = newTaskInput.value.trim();
+            if (!title) return showMessage('Palun sisesta ülesande nimi', true);
+            try {
+                mockAddTask(title);
+                newTaskInput.value = '';
+                showMessage('Ülesanne lisatud!');
+                loadTasks();
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        }
+
+        // Переключение выполнения задачи
+        async function toggleTaskStatus(e) {
+            const taskId = e.target.dataset.id;
+            const completed = e.target.checked;
+            try {
+                mockUpdateTask(taskId, { completed });
+                showMessage('Ülesanne uuendatud!');
+                loadTasks();
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        }
+
+        // Удаление задачи
+        async function deleteTask(e) {
+            const taskId = e.target.dataset.id;
+            if (!confirm('Kas olete kindel, et soovite selle ülesande kustutada?')) return;
+            try {
+                mockDeleteTask(taskId);
+                showMessage('Ülesanne kustutatud!');
+                loadTasks();
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        }
+
+        // Выход
+        function logout() {
+            userToken = null;
+            currentUser = null;
+            authSection.style.display = 'block';
+            taskSection.style.display = 'none';
+            usernameInput.value = '';
+            passwordInput.value = '';
+            newTaskInput.value = '';
+            taskList.innerHTML = '';
+        }
+
+        // Проверка авторизации при загрузке
+        function checkAuth() {
+            if (userToken && currentUser) {
+                authSection.style.display = 'none';
+                taskSection.style.display = 'block';
+                loadTasks();
+            }
+        }
+
+        // Обработчики событий
+        loginBtn.addEventListener('click', login);
+        registerBtn.addEventListener('click', register);
+        logoutBtn.addEventListener('click', logout);
+        addTaskBtn.addEventListener('click', addTask);
+        newTaskInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTask(); });
+        document.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
+</body>
+</html>
