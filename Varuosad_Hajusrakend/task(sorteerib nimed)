@@ -1,85 +1,71 @@
-from flask import Flask, jsonify, request
-import json #"libary" kommenteerimine
+from flask import Flask, request
+import json
 
-app = Flask(__name__) #Flaski rakenduse loomine
+# Создаем Flask приложение
+app = Flask(__name__)
+
+# Константа с названиями колонок файла
+HEADERS = [
+    "sn", "name", "Column3", "Column4", "Column5", 
+    "Column6", "Column7", "Column8", "price", "brand", "Column11"
+]
+
+def read_file_data():
+    """Читает данные из файла и возвращает список строк"""
+    try:
+        with open('LE.txt', 'r', encoding='ISO-8859-1') as file:
+            return file.readlines()
+    except FileNotFoundError:
+        return None
 
 @app.route('/')
 def index():
-    try:
-        with open('LE.txt', 'r', encoding='ISO-8859-1') as file:
-            data = file.read()
-
-        # Return the content in plain text (this will not affect the JSON output)
-        return f"<pre>{data}</pre>"
-
-    except FileNotFoundError:
-        return "File not found. Make sure LE.txt exists in the same directory."
-        # See töödeldab taotlusi. Proovib avada faili LE.txt. Kui fail ei leidnud, siis tagastab veateate.
+    """Главная страница - показывает содержимое файла как есть"""
+    if (data := read_file_data()) is not None:
+        return f"<pre>{''.join(data)}</pre>"
+    return "Файл не найден. Убедитесь, что LE.txt существует."
 
 @app.route('/json/spare-parts', methods=['GET'])
 def file_to_json():
-    try:
+    """
+    API endpoint:
+    - Читает данные из файла
+    - Конвертирует в JSON
+    - Фильтрует по параметрам запроса
+    - Возвращает отформатированный JSON
+    """
+    # 1. Чтение данных из файла
+    if (lines := read_file_data()) is None:
+        return "Файл не найден.", 404
+    
+    json_data = []
+    
+    # 2. Обработка каждой строки файла
+    for line in lines:
+        # Разделяем строку по табуляции и очищаем от лишних символов
+        values = [v.strip('"') for v in line.strip().split("\t")]
         
-        with open('LE.txt', 'r', encoding='ISO-8859-1') as file:
-            # loeb faili
-            lines = file.readlines()
-
-        # Võtab väjla pealkirjad
-        headers = ["sn", "name", "Column3", "Column4", "Column5", "Column6", "Column7", "Column8", "price", "brand", "Column11"]
-
-        json_data = []
-
-        # Loeb faili rida rea kaupa
-        for line in lines:
-            values = line.strip().split("\t")  # Jagab iga rida TAB-i abil
-            if len(values) == len(headers):
-                # Eemaldab jutumärgid väärtustest
-                values = [value.strip('"') for value in values]
-
-                row_dict = dict(zip(headers, values)) # Loob sõnastiku, kus võtmed on headers ja väärtused on values
-                json_data.append(row_dict)
-
-        # Saab päringu parameetrid
-        filter_name = request.args.get('name')
-        filter_sn = request.args.get('sn')
-
-        # Filtreerib andmeid vastavalt päringu parameetritele
-        if filter_name:
-            json_data = [item for item in json_data if filter_name.lower() in item['name'].lower()]
-
-        if filter_sn:
-            json_data = [item for item in json_data if filter_sn in item['sn']]
-
-        # Converteerib sõnastiku JSON-iks
-        json_string = json.dumps(json_data, indent=4)
-
-        # Tagastab JSON-i
-        return f"<pre>{json_string}</pre>"
-
-    except FileNotFoundError:
-        return "File not found. Make sure LE.txt exists in the same directory."
-    except Exception as e:
-        return f"Error processing the file: {str(e)}"
+        # Проверяем что количество элементов соответствует заголовкам
+        if len(values) == len(HEADERS):
+            # Создаем словарь {заголовок: значение}
+            json_data.append(dict(zip(HEADERS, values)))
+    
+    # 3. Фильтрация по параметрам запроса
+    if (name_filter := request.args.get('name')):
+        # Регистронезависимый поиск по части имени
+        json_data = [item for item in json_data 
+                    if name_filter.lower() in item['name'].lower()]
+    
+    if (sn_filter := request.args.get('sn')):
+        # Точный поиск по серийному номеру
+        json_data = [item for item in json_data 
+                    if sn_filter == item['sn']]
+    
+    # 4. Форматирование результата в красивый JSON
+    json_output = json.dumps(json_data, indent=2, ensure_ascii=False)
+    
+    return f"<pre>{json_output}</pre>"
 
 if __name__ == '__main__':
+    # Запуск сервера с автоматической перезагрузкой при изменениях
     app.run(debug=True)
-    # Panen tööle selle rakenduse
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-link:http://127.0.0.1:5000/json/spare-parts?name=polt
